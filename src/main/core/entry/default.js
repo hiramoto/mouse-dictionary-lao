@@ -7,15 +7,22 @@
 import entry from "../entry";
 import entryGeneratorEn from "./en";
 import entryGeneratorJa from "./ja";
+import entryGeneratorLo from "./lo";
 
 // Can add other languages here
 const generators = {
   en: entryGeneratorEn,
   ja: entryGeneratorJa,
+  lo: entryGeneratorLo,
   default: entryGeneratorEn,
 };
 
-const languageDetector = (text) => (isEnglishText(text) ? "en" : "ja");
+const languageDetector = (text) => {
+  if (isLaoText(text)) {
+    return "lo";
+  }
+  return isEnglishText(text) ? "en" : "ja";
+};
 
 const isEnglishText = (str) => {
   let result = true;
@@ -29,6 +36,8 @@ const isEnglishText = (str) => {
   }
   return result;
 };
+
+const isLaoText = (str) => /[\u0e80-\u0eff]/u.test(str);
 
 const build = () => {
   return entry.build(languageDetector, generators);
