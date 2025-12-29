@@ -6,6 +6,7 @@
 
 import { env, storage } from "../extern";
 import type { DictionaryFileEncoding, DictionaryFileFormat } from "../types";
+import { normalizeLaoToneMarks } from "../../main/lib/normalize";
 import { EijiroParser, JsonDictParser, SimpleDictParser } from "./dictparser";
 import { LineReader } from "./linereader";
 
@@ -60,7 +61,8 @@ export const load = async (loadParam: LoadParam, callback: Callback): Promise<nu
     if (!hd) {
       continue;
     }
-    dictData[hd.head] = hd.desc;
+    const head = normalizeLaoToneMarks(hd.head);
+    dictData[head] = hd.desc;
     wordCount += 1;
     if (wordCount === 1 || (wordCount > 1 && wordCount % env.get().registerRecordsAtOnce === 0)) {
       callback({ name: "loading", count: wordCount, word: hd });
@@ -72,7 +74,7 @@ export const load = async (loadParam: LoadParam, callback: Callback): Promise<nu
 
   const lastData = parser.flush();
   if (lastData) {
-    Object.assign(dictData, lastData);
+    Object.assign(dictData, normalizeDictData(lastData));
     wordCount += Object.keys(lastData).length;
   }
   await storage.local.set(dictData);
@@ -130,7 +132,16 @@ const loadJsonFile = async (fname: string): Promise<Record<string, any>> => {
 
 const registerDict = async (fname: string): Promise<number> => {
   const dictData = await loadJsonFile(fname);
-  const wordCount = Object.keys(dictData).length;
-  await storage.local.set(dictData);
+  const normalizedDictData = normalizeDictData(dictData);
+  const wordCount = Object.keys(normalizedDictData).length;
+  await storage.local.set(normalizedDictData);
   return wordCount;
+};
+
+const normalizeDictData = (dictData: Record<string, string>): Record<string, string> => {
+  const result: Record<string, string> = {};
+  for (const [head, desc] of Object.entries(dictData)) {
+    result[normalizeLaoToneMarks(head)] = desc;
+  }
+  return result;
 };
