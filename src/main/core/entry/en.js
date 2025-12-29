@@ -5,12 +5,14 @@
  */
 
 import UniqList from "uniqlist";
+import { normalizeLaoToneMarks } from "../../lib/normalize";
 import text from "../../lib/text";
 import rule from "../rule";
 
 const createLookupWordsEn = (rawSourceStr, withCapitalized = false, mustIncludeOriginalText = false) => {
   // U+200C: zero width non-joiner
-  const replacedSourceStr = rawSourceStr.replaceAll("\u200c", "").replaceAll("/", " / ");
+  const normalizedSourceStr = normalizeLaoToneMarks(rawSourceStr);
+  const replacedSourceStr = normalizedSourceStr.replaceAll("\u200c", "").replaceAll("/", " / ");
   const sourceStr = text.dealWithHyphens(replacedSourceStr, rule.doLetters);
 
   const { firstWords, linkedWords } = processSourceString(sourceStr);

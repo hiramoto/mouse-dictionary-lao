@@ -5,12 +5,14 @@
  */
 
 import UniqList from "uniqlist";
+import { normalizeLaoToneMarks } from "../../lib/normalize";
 import rule from "../rule";
 const RE_ALPHABETS_NUMBERS = /[A-Za-z0-9]/g;
 const FULLWIDTH_OFFSET = 0xfee0;
 
 const createLookupWordsJa = (sourceStr) => {
-  const str = sourceStr
+  const normalizedSourceStr = normalizeLaoToneMarks(sourceStr);
+  const str = normalizedSourceStr
     .substring(0, 40)
     .replaceAll("\u200c", "") // ZERO WIDTH NON-JOINER
     .replace(RE_ALPHABETS_NUMBERS, (s) => String.fromCharCode(s.charCodeAt(0) + FULLWIDTH_OFFSET));
