@@ -115,7 +115,7 @@ class Traverser {
 
 const retrieveProperStartIndex = (sourceText, cursorIndex) => {
   let currentLength = 0;
-  const tokens = tokenize(sourceText, "ja-JP");
+  const tokens = tokenize(sourceText, detectSegmenterLanguage(sourceText));
   if (!tokens) {
     return cursorIndex;
   }
@@ -127,6 +127,13 @@ const retrieveProperStartIndex = (sourceText, cursorIndex) => {
     currentLength += token.length;
   }
   return 0;
+};
+
+const detectSegmenterLanguage = (sourceText) => {
+  if (/[\u0e80-\u0eff]/u.test(sourceText)) {
+    return "lo-LA";
+  }
+  return "ja-JP";
 };
 
 const searchStartIndex = (text, index, doGetCharacterType) => {
